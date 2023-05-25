@@ -1,3 +1,4 @@
 *.jpg
 models/*
 venv
+.DS_Store
