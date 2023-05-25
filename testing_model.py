@@ -31,6 +31,9 @@ def test_image_classifier_with_folder(model, path, y_true, img_height=250, img_w
     for filename in os.listdir(path):
         # read each image in the folder and classifies it
         test_path = os.path.join(path, filename)
+        if (".DS_Store" in test_path):
+            continue
+        print(test_path)
         test_image = keras.preprocessing.image.load_img(
             test_path, target_size=(img_height, img_width, 3))
         # from image to array, can try type(test_image)
@@ -58,3 +61,7 @@ def test_image_classifier_with_folder(model, path, y_true, img_height=250, img_w
 test_image_classifier_with_folder(face_classifier,
                                   'datasets/test_images/HugoSilva',
                                   y_true='HugoSilva')
+
+test_image_classifier_with_folder(face_classifier,
+                                  'datasets/test_images/Unknown',
+                                  y_true='Unknown')

@@ -1,4 +1,4 @@
 *.jpg
-models/*.h5
+models/*
 venv
 .DS_Store
