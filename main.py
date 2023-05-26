@@ -23,7 +23,6 @@ model_name = 'face_classifier_ResNet50Custom.h5'
 
 face_classifier = keras.models.load_model(f'models/{model_name}')
 
-
 face_cascade = cv.CascadeClassifier(cv.data.haarcascades
                                     + 'haarcascade_frontalface_default.xml')
 
@@ -54,8 +53,10 @@ while (True):
 
     def get_className(classNo):
         if classNo == 0:
-            return "Hugo"
+            return "Claudia"
         elif classNo == 1:
+            return "Hugo"
+        else:
             return "Unknown"
 
     for (x, y, w, h) in faces:
@@ -74,7 +75,7 @@ while (True):
         confidence = prediction[0][index]
         print(prediction)
 
-        if index != 1:
+        if index < 2:
             color = GREEN
         else:
             color = RED
