@@ -2,3 +2,10 @@
 models/*
 venv
 .DS_Store
+datasets/test_images/HugoSilva/img
+
+datasets/test_images/Unknown/img
+
+datasets/train_images/HugoSilva/img
+
+datasets/train_images/Unknown/img

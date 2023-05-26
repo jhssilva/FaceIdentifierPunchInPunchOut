@@ -1,89 +1,64 @@
-# Common imports
+import os
+import matplotlib as mpl
+import numpy as np
+import cv2 as cv
+import tensorflow as tf
+from tensorflow import keras
+from keras.layers import Flatten, Dense, Input
+from keras_vggface.vggface import VGGFace
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.callbacks import ModelCheckpoint
-from tensorflow import keras
-import tensorflow as tf
-import os
-import numpy as np
 
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-import seaborn as sns
+train_dataset = tf.keras.utils.image_dataset_from_directory('datasets/train_images',
+                                                            shuffle=True,
+                                                            batch_size=8,
+                                                            image_size=(224, 224))
 
-sns.set()
+test_dataset = tf.keras.utils.image_dataset_from_directory('datasets/test_images',
+                                                           shuffle=False,
+                                                           image_size=(224, 224))
 
-# * Dataset information
+class_names = train_dataset.class_names
+num_classes = len(class_names)
 
-# Test dataset is set explicitly, because the amount of data is very small
-train_image_folder = os.path.join('datasets', 'train_images')
-test_image_folder = os.path.join('datasets', 'test_images')
-img_height, img_width = 250, 250  # size of images
-num_classes = 2  # HugoSilva - Unknown # TODO: Get Number Of folders in train_image_folder
+data_augumentation = tf.keras.Sequential([tf.keras.layers.experimental.preprocessing.RandomFlip("horizontal_and_vertical"),
+                                          tf.keras.layers.experimental.preprocessing.RandomRotation(
+    0.2),
+    tf.keras.layers.experimental.preprocessing.RandomZoom(0.1)])
 
-# Training settings
-validation_ratio = 0.15  # 15% for the validation
-batch_size = 16
-
-AUTOTUNE = tf.data.AUTOTUNE
-
-# Train and validation sets of initial dataset
-train_ds = keras.preprocessing.image_dataset_from_directory(
-    train_image_folder,
-    validation_split=validation_ratio,
-    subset="training",
-    seed=42,
-    image_size=(img_height, img_width),
-    label_mode='categorical',
-    batch_size=batch_size,
-    shuffle=True)
-
-val_ds = keras.preprocessing.image_dataset_from_directory(
-    train_image_folder,
-    validation_split=validation_ratio,
-    subset="validation",
-    seed=42,
-    image_size=(img_height, img_width),
-    batch_size=batch_size,
-    label_mode='categorical',
-    shuffle=True)
-
-
-test_ds = keras.preprocessing.image_dataset_from_directory(
-    test_image_folder,
-    image_size=(img_height, img_width),
-    label_mode='categorical',
-    shuffle=False)
-
-class_names = test_ds.class_names
-
-# * BUILD MODEL
-base_model = keras.applications.vgg16.VGG16(weights='imagenet',
-                                            include_top=False,  # without dense part of the network
-                                            input_shape=(img_height, img_width, 3))
+vggface_resnet_base = VGGFace(
+    model='resnet50', include_top=False, input_shape=(224, 224, 3))
 
 # Set layers to non-trainable
-for layer in base_model.layers:
+for layer in vggface_resnet_base.layers:
     layer.trainable = False
+vggface_resnet_base.trainable = False
+last_layer = vggface_resnet_base.get_layer('avg_pool').output
 
-# Add custom layers on top of the convolutional layers of VGG16
-flatten = keras.layers.Flatten()(base_model.output)
-dense_4096_1 = keras.layers.Dense(4096, activation='relu')(flatten)
-dense_4096_2 = keras.layers.Dense(4096, activation='relu')(dense_4096_1)
-output = keras.layers.Dense(num_classes, activation='sigmoid')(dense_4096_2)
-
-VGG16 = keras.models.Model(inputs=base_model.input,
-                           outputs=output,
-                           name='VGG16')
-VGG16.summary()
+# Build up the new model
+inputs = tf.keras.Input(shape=(224, 224, 3))
+x = data_augumentation(inputs)
+x = vggface_resnet_base(x)
+x = Flatten(name="flatten")(x)
 
 
-# * Training
+out = Dense(num_classes + 1, activation='softmax', name='classifier')(x)
+custom_vgg_model = keras.Model(inputs, out, name="ResNet50Custom")
 
-face_classifier = VGG16
-face_classifier.summary()
+# * Train Model
+base_learning_rate = 0.001
+
+face_classifier = custom_vgg_model
+custom_vgg_model.summary()
 
 name_to_save = f"models/face_classifier_{face_classifier.name}.h5"
 
+custom_vgg_model.compile(optimizer=tf.keras.optimizers.Adam(
+    learning_rate=base_learning_rate),
+    loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+    metrics=['accuracy'])
+
+# ! Security
 # ModelCheckpoint to save model in case of interrupting the learning process
 checkpoint = ModelCheckpoint(name_to_save,
                              monitor="val_loss",
@@ -94,22 +69,17 @@ checkpoint = ModelCheckpoint(name_to_save,
 # EarlyStopping to find best model with a large number of epochs
 earlystop = EarlyStopping(monitor='val_loss',
                           restore_best_weights=True,
-                          patience=5,  # number of epochs with no improvement after which training will be stopped
+                          patience=3,  # number of epochs with no improvement after which training will be stopped
                           verbose=1)
 
 callbacks = [earlystop, checkpoint]
 
+epochs = 30
 
-face_classifier.compile(loss='categorical_crossentropy',
-                        optimizer=keras.optimizers.Adam(learning_rate=0.01),
-                        metrics=['accuracy'])
+history = custom_vgg_model.fit(
+    train_dataset, callbacks=callbacks, epochs=epochs)
 
-epochs = 50
-
-history = face_classifier.fit(
-    train_ds,
-    epochs=epochs,
-    callbacks=callbacks,
-    validation_data=val_ds)
+test_loss, test_acc = face_classifier.evaluate(test_dataset, verbose=2)
+print('\nTest accuracy:', test_acc)
 
 face_classifier.save(name_to_save)
