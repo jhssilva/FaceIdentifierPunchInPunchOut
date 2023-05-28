@@ -1,4 +1,3 @@
-import os
 import matplotlib as mpl
 import numpy as np
 import cv2 as cv
@@ -13,10 +12,6 @@ train_dataset = tf.keras.utils.image_dataset_from_directory('datasets/train_imag
                                                             shuffle=True,
                                                             batch_size=8,
                                                             image_size=(224, 224))
-
-test_dataset = tf.keras.utils.image_dataset_from_directory('datasets/test_images',
-                                                           shuffle=False,
-                                                           image_size=(224, 224))
 
 class_names = train_dataset.class_names
 num_classes = len(class_names)
@@ -58,7 +53,7 @@ custom_vgg_model.compile(optimizer=tf.keras.optimizers.Adam(
     loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
     metrics=['accuracy'])
 
-# ! Security
+# * Safety
 # ModelCheckpoint to save model in case of interrupting the learning process
 checkpoint = ModelCheckpoint(name_to_save,
                              monitor="val_loss",
@@ -78,8 +73,5 @@ epochs = 30
 
 history = custom_vgg_model.fit(
     train_dataset, callbacks=callbacks, epochs=epochs)
-
-test_loss, test_acc = face_classifier.evaluate(test_dataset, verbose=2)
-print('\nTest accuracy:', test_acc)
 
 face_classifier.save(name_to_save)

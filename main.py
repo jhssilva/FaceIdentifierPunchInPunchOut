@@ -17,7 +17,6 @@ GREEN = (0, 255, 0)
 
 # * Load model to face classification
 model_name = 'face_classifier_ResNet50Custom.h5'
-
 face_classifier = keras.models.load_model(f'models/{model_name}')
 
 face_cascade = cv.CascadeClassifier(cv.data.haarcascades
