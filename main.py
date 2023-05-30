@@ -4,6 +4,7 @@ from PySide6 import QtCore, QtWidgets, QtGui
 
 from camera import camera
 from manage_employee import add_employee, remove_employee
+from train_model import train_model
 
 
 class Menu(QtWidgets.QWidget):
@@ -42,7 +43,7 @@ class Menu(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def handleButtonTrainModel(self):
-        print("Train Model")
+        train_model()
 
     @QtCore.Slot()
     def handleButtonAddEmployee(self):
