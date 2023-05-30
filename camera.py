@@ -168,6 +168,7 @@ def get_date_time():
 
 
 def punch_in_or_out(punch_in: bool, employee_name: str):
+    employee_status_is_blocked.add(employee_name)
     create_employee_countdown(employee_name)
     if punch_in:
         employees_status_has_punched_in.add(employee_name)
@@ -194,9 +195,8 @@ def create_employee_countdown(employee_name):
 
 
 def countdown(t, employee_name):
-    employee_status_is_blocked.add(employee_name)
-    while t:
+    t_tim = t
+    while t_tim:
         time.sleep(1)
-        t -= 1
-
+        t_tim -= 1
     employee_status_is_blocked.remove(employee_name)
