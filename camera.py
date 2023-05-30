@@ -2,6 +2,7 @@
 import matplotlib.pyplot as plt
 import cv2 as cv
 import numpy as np
+import os
 
 import tensorflow as tf
 from tensorflow import keras
@@ -15,8 +16,18 @@ width, height = 224, 224
 RED = (0, 0, 255)
 GREEN = (0, 255, 0)
 
+unknown_name = "unknown"
+path_train_images_folder = "datasets/train_images"
+
 
 def camera():
+    global employees_list
+    employees_list = get_employees_names_from_file_structure()
+
+    if len(employees_list) == 0:
+        print("No employees found")
+        exit(False)
+
     # * Load model to face classification
     model_name = 'face_classifier_ResNet50Custom.h5'
     face_classifier = keras.models.load_model(f'models/{model_name}')
@@ -56,12 +67,12 @@ def camera():
             face_image = frame[y:y+h, x:x+w]
 
             # resize image to match model's expected sizing
-            face_image = tf.image.resize(face_image, [224, 224])
+            face_image = tf.image.resize(face_image, [width, height])
 
             # return the image with shaping that TF wants.
             face_image = np.expand_dims(face_image, axis=0)
             # Execute module prediction
-            prediction = face_classifier.predict(face_image)
+            prediction = face_classifier.predict(face_image, verbose=0)
             # Get the index of the highest confidence score
             index = np.argmax(prediction[0])
             # Get the confidence score
@@ -77,7 +88,7 @@ def camera():
 
             cv.putText(frame,
                        # text to put
-                       "{:6} - {:.2f}%".format(get_className(index),
+                       "{:6} - {:.2f}%".format(get_employee_name(index).upper(),
                                                confidence*100),
                        (x, y),
                        cv.FONT_HERSHEY_PLAIN,  # font
@@ -98,17 +109,26 @@ def camera():
     exit(True)
 
 
-def get_className(classNo):
-    if classNo == 0:
-        return "Claudia"
-    elif classNo == 1:
-        return "Hugo"
-    else:
-        return "Unknown"
+def get_employee_name(index):
+    if (index > get_employees_number_with_unknown()):
+        return unknown_name
+    return employees_list[index]
+
+
+def get_employees_number_with_unknown():
+    return len(employees_list)
 
 
 def get_color(index):
-    color = RED
-    if index < 2:
-        color = GREEN
+    color = GREEN
+    if (index > get_employees_number_with_unknown() or get_employee_name(index) == unknown_name):
+        color = RED
     return color
+
+
+def get_employees_names_from_file_structure():
+    # Get the list of all directories in the path
+    dirlist = [item for item in os.listdir(path_train_images_folder) if os.path.isdir(
+        os.path.join(path_train_images_folder, item))]
+    dir_list_ordered = sorted(dirlist)
+    return dir_list_ordered
