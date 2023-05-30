@@ -1,0 +1,3 @@
+Hugo punched in at 2023-05-30 17:01:05.743148
+Hugo punched out at 2023-05-30 17:01:25.972319
+Hugo punched in at 2023-05-30 17:01:46.148937
