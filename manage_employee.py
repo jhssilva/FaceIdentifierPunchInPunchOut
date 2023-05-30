@@ -4,6 +4,7 @@ import shutil
 
 
 training_folder_path = 'datasets/train_images/'
+path_to_employees_info = "employees_info"
 
 
 def add_employee():
@@ -64,3 +65,20 @@ def remove_employee():
     else:
         print("Employee doesn't exist!")
     return
+
+
+def get_punch_in_out_info_employee():
+    employee_name = str(input("Enter the Employee Name: ")).lower()
+    read_employees_punch_in_out_info(employee_name)
+
+
+def read_employees_punch_in_out_info(employee_name):
+    path_to_employees_info_txt = os.path.join(
+        path_to_employees_info, employee_name) + '.txt'
+    if (os.path.isfile(path_to_employees_info_txt)):
+        f = open(path_to_employees_info_txt, "r")
+        lines = f.readlines()
+        for line in lines:
+            print(line, end="")
+    else:
+        print("Employee information doesn't exist!")

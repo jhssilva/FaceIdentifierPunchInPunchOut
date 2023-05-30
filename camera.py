@@ -200,6 +200,3 @@ def countdown(t, employee_name):
         t -= 1
 
     employee_status_is_blocked.remove(employee_name)
-
-
-camera()
