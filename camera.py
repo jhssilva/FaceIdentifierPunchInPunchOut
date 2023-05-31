@@ -15,6 +15,7 @@ np.set_printoptions(suppress=True)
 
 width, height = 224, 224
 
+
 # Colors to draw rectangles in BGR
 RED = (0, 0, 255)
 GREEN = (0, 255, 0)
@@ -27,6 +28,8 @@ time_between_punch_in_punch_out = 20  # In seconds
 
 
 def camera():
+    global exit_threads
+    exit_threads = False
     # * Define variables employee
 
     global employees_list
@@ -120,9 +123,10 @@ def camera():
         if k == 27:
             break
 
+    exit_threads = True
     video_capture.release()
     cv.destroyAllWindows()
-    exit(True)
+    return True
 
 
 def get_employee_name(index: int) -> str:
@@ -197,6 +201,8 @@ def create_employee_countdown(employee_name):
 def countdown(t, employee_name):
     t_tim = t
     while t_tim:
+        if (exit_threads):
+            return
         time.sleep(1)
         t_tim -= 1
     employee_status_is_blocked.remove(employee_name)

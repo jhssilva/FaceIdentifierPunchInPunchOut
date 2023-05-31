@@ -46,7 +46,8 @@ class Menu(QtWidgets.QWidget):
     def handleButtonStart(self):
         has_worked = camera()
         if not has_worked:
-            print("Error")
+            print("Error opening camera!")
+        print("Camera Closed!")
 
     @QtCore.Slot()
     def handleButtonReadPunchInOutInfoEmployee(self):
