@@ -21,6 +21,7 @@ class Menu(QtWidgets.QWidget):
         self.buttonExit = QtWidgets.QPushButton("Exit")
 
         self.layout = QtWidgets.QVBoxLayout(self)
+        self.layout.setSpacing(10)
 
         # * Add Widgets to layout
         self.layout.addWidget(self.buttonStart)
@@ -39,6 +40,7 @@ class Menu(QtWidgets.QWidget):
         self.buttonRemoveEmployee.clicked.connect(
             self.handleButtonRemoveEmployee)
         self.buttonExit.clicked.connect(self.handleButtonExit)
+        self.setLayout(self.layout)
 
     @QtCore.Slot()
     def handleButtonStart(self):
@@ -71,7 +73,7 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication([])
 
     widget = Menu()
-    widget.resize(800, 600)
+    widget.resize(300, 200)
     widget.show()
 
     sys.exit(app.exec())
