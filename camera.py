@@ -7,6 +7,8 @@ import datetime
 import time
 import threading
 
+from voice import read_message
+
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.python.ops.numpy_ops import np_config
@@ -36,7 +38,9 @@ def camera():
     employees_list = get_employees_names_from_file_structure()
 
     if len(employees_list) == 0:
-        print("No employees found")
+        message_out = "No employees found"
+        print(message_out)
+        read_message(message_out)
         exit(False)
 
     global employees_status_has_punched_in
@@ -50,7 +54,9 @@ def camera():
     face_classifier = keras.models.load_model(f'models/{model_name}')
 
     if face_classifier is None:
-        print("Unable to load the model")
+        message_out = "Unable to load the model"
+        read_message(message_out)
+        print(message_out)
         exit(False)
 
     face_cascade = cv.CascadeClassifier(cv.data.haarcascades
@@ -60,9 +66,15 @@ def camera():
     video_capture = cv.VideoCapture(0)
 
     if not video_capture.isOpened():
-        print("Unable to access the camera")
+        message_out = "Unable to access the camera"
+        print(message_out)
+        read_message(message_out)
     else:
-        print("Access to the camera was successfully obtained")
+        message_out = "Access to the camera was successfully obtained"
+        read_message(message_out)
+        print(message_out)
+
+    read_message("Press Escape to Exit! Or Say Exit!")
 
     while (True):
         # Take each frame
@@ -180,6 +192,8 @@ def punch_in_or_out(punch_in: bool, employee_name: str):
         employees_status_has_punched_in.remove(employee_name)
     message_in_or_out = "in" if punch_in else "out"
     message = f"{employee_name.capitalize()} punched {message_in_or_out} at {get_date_time()}"
+    message_speaker = f"{employee_name.capitalize()} punched {message_in_or_out}"
+    read_message(message_speaker)
     write_to_file(employee_name, message)
     print(message)
 

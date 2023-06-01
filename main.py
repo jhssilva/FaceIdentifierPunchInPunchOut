@@ -1,6 +1,8 @@
 import sys
 import random
-from PySide6 import QtCore, QtWidgets, QtGui
+from PySide6 import QtCore, QtWidgets
+from voice import read_message, read_start_menu
+
 
 from camera import camera
 from manage_employee import add_employee, remove_employee, get_punch_in_out_info_employee
@@ -44,37 +46,49 @@ class Menu(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def handleButtonStart(self):
+        read_message("Opening Camera!")
         has_worked = camera()
         if not has_worked:
+            read_message("Error opening camera!")
             print("Error opening camera!")
         print("Camera Closed!")
+        read_message("Camera Closed!")
 
     @QtCore.Slot()
     def handleButtonReadPunchInOutInfoEmployee(self):
+        read_message("Opening Read Punch In Out Info Employee!")
         get_punch_in_out_info_employee()
 
     @QtCore.Slot()
     def handleButtonTrainModel(self):
+        read_message("Opening Model Training!")
         train_model()
 
     @QtCore.Slot()
     def handleButtonAddEmployee(self):
+        read_message("Opening Add Employee!")
         add_employee()
 
     @QtCore.Slot()
     def handleButtonRemoveEmployee(self):
+        read_message("Opening Remove Employee!")
         remove_employee()
 
     @QtCore.Slot()
     def handleButtonExit(self):
+        read_message("Exiting the application!")
         exit()
 
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
 
+    # * Window creation
     widget = Menu()
     widget.resize(300, 200)
     widget.show()
+
+    # * Read start menu
+    read_start_menu()
 
     sys.exit(app.exec())
