@@ -71,10 +71,10 @@ def camera():
         read_message(message_out)
     else:
         message_out = "Access to the camera was successfully obtained"
-        read_message(message_out)
+        read_message("Camera Opened!")
         print(message_out)
 
-    read_message("Press Escape to Exit! Or Say Exit!")
+    read_message("Press Escape to Exit!")
 
     while (True):
         # Take each frame

@@ -1,9 +1,6 @@
 from os import system
 import threading
-
-
-def say_hello():
-    system('say Hello world!')
+import speech_recognition as sr
 
 
 def read_message(message):
@@ -15,6 +12,13 @@ def message_reading(message):
     system(f'say {message}')
 
 
-def read_start_menu():
-    read_message(
-        "Welcome to the menu of the face recognition system that tracks the punch in and punch out of employees.")
+def start_listen(callback):
+    recognizer = sr.Recognizer()
+    microphone = sr.Microphone()
+
+    with microphone as source:
+        recognizer.adjust_for_ambient_noise(source, duration=1)
+        # audio = recognizer.listen(source)
+        audio1 = recognizer.record(source, duration=4)
+        word = recognizer.recognize_google(audio1)
+        callback(word)
