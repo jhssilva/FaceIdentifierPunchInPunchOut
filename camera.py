@@ -7,8 +7,6 @@ import datetime
 import time
 import threading
 
-from voice import read_message
-
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.python.ops.numpy_ops import np_config
@@ -16,7 +14,6 @@ np_config.enable_numpy_behavior()
 np.set_printoptions(suppress=True)
 
 width, height = 224, 224
-
 
 # Colors to draw rectangles in BGR
 RED = (0, 0, 255)
@@ -30,17 +27,13 @@ time_between_punch_in_punch_out = 20  # In seconds
 
 
 def camera():
-    global exit_threads
-    exit_threads = False
     # * Define variables employee
 
     global employees_list
     employees_list = get_employees_names_from_file_structure()
 
     if len(employees_list) == 0:
-        message_out = "No employees found"
-        print(message_out)
-        read_message(message_out)
+        print("No employees found")
         exit(False)
 
     global employees_status_has_punched_in
@@ -54,9 +47,7 @@ def camera():
     face_classifier = keras.models.load_model(f'models/{model_name}')
 
     if face_classifier is None:
-        message_out = "Unable to load the model"
-        read_message(message_out)
-        print(message_out)
+        print("Unable to load the model")
         exit(False)
 
     face_cascade = cv.CascadeClassifier(cv.data.haarcascades
@@ -66,15 +57,9 @@ def camera():
     video_capture = cv.VideoCapture(0)
 
     if not video_capture.isOpened():
-        message_out = "Unable to access the camera"
-        print(message_out)
-        read_message(message_out)
+        print("Unable to access the camera")
     else:
-        message_out = "Access to the camera was successfully obtained"
-        read_message("Camera Opened!")
-        print(message_out)
-
-    read_message("Press Escape to Exit!")
+        print("Access to the camera was successfully obtained")
 
     while (True):
         # Take each frame
@@ -135,10 +120,9 @@ def camera():
         if k == 27:
             break
 
-    exit_threads = True
     video_capture.release()
     cv.destroyAllWindows()
-    return True
+    exit(True)
 
 
 def get_employee_name(index: int) -> str:
@@ -184,7 +168,6 @@ def get_date_time():
 
 
 def punch_in_or_out(punch_in: bool, employee_name: str):
-    employee_status_is_blocked.add(employee_name)
     create_employee_countdown(employee_name)
     if punch_in:
         employees_status_has_punched_in.add(employee_name)
@@ -192,8 +175,6 @@ def punch_in_or_out(punch_in: bool, employee_name: str):
         employees_status_has_punched_in.remove(employee_name)
     message_in_or_out = "in" if punch_in else "out"
     message = f"{employee_name.capitalize()} punched {message_in_or_out} at {get_date_time()}"
-    message_speaker = f"{employee_name.capitalize()} punched {message_in_or_out}"
-    read_message(message_speaker)
     write_to_file(employee_name, message)
     print(message)
 
@@ -213,10 +194,9 @@ def create_employee_countdown(employee_name):
 
 
 def countdown(t, employee_name):
-    t_tim = t
-    while t_tim:
-        if (exit_threads):
-            return
+    employee_status_is_blocked.add(employee_name)
+    while t:
         time.sleep(1)
-        t_tim -= 1
+        t -= 1
+
     employee_status_is_blocked.remove(employee_name)
