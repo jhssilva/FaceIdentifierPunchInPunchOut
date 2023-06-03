@@ -41,7 +41,6 @@ def train_model():
     for layer in vggface_resnet_base.layers:
         layer.trainable = False
     vggface_resnet_base.trainable = False
-    last_layer = vggface_resnet_base.get_layer('avg_pool').output
 
     # Build up the new model
     inputs = tf.keras.Input(shape=(224, 224, 3))
@@ -62,7 +61,7 @@ def train_model():
 
     custom_vgg_model.compile(optimizer=tf.keras.optimizers.Adam(
         learning_rate=base_learning_rate),
-        loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+        loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
         metrics=['accuracy'])
 
     # * Safety
