@@ -88,6 +88,7 @@ def train_model():
     face_classifier.save(name_to_save)
 
     read_message("The model has been trained and saved")
+    print("The model has been trained and saved")
 
 
 def get_number_employees_on_folder():
