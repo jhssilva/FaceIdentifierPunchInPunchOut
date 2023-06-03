@@ -1,15 +1,26 @@
 import matplotlib as mpl
 import numpy as np
 import cv2 as cv
+import os
 import tensorflow as tf
+from voice import read_message
 from tensorflow import keras
 from keras.layers import Flatten, Dense, Input
 from keras_vggface.vggface import VGGFace
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.callbacks import ModelCheckpoint
 
+path_train_images_folder = 'datasets/train_images/'
+
 
 def train_model():
+    if (get_number_employees_on_folder() < 2):
+        message_output = "There are not enough employees to train the model. Its needed at least two folders. (One employee and one unknown)"
+        read_message(message_output)
+        print(message_output)
+        exit(False)
+
+    read_message("Training the Model!")
     train_dataset = tf.keras.utils.image_dataset_from_directory('datasets/train_images',
                                                                 shuffle=True,
                                                                 batch_size=8,
@@ -30,7 +41,6 @@ def train_model():
     for layer in vggface_resnet_base.layers:
         layer.trainable = False
     vggface_resnet_base.trainable = False
-    last_layer = vggface_resnet_base.get_layer('avg_pool').output
 
     # Build up the new model
     inputs = tf.keras.Input(shape=(224, 224, 3))
@@ -51,7 +61,7 @@ def train_model():
 
     custom_vgg_model.compile(optimizer=tf.keras.optimizers.Adam(
         learning_rate=base_learning_rate),
-        loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+        loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
         metrics=['accuracy'])
 
     # * Safety
@@ -76,3 +86,13 @@ def train_model():
         train_dataset, callbacks=callbacks, epochs=epochs)
 
     face_classifier.save(name_to_save)
+
+    read_message("The model has been trained and saved")
+    print("The model has been trained and saved")
+
+
+def get_number_employees_on_folder():
+    # Get the number of all directories on the path
+    dirlist = [item for item in os.listdir(path_train_images_folder) if os.path.isdir(
+        os.path.join(path_train_images_folder, item))]
+    return len(dirlist)
