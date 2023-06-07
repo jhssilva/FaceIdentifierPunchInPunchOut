@@ -19,6 +19,6 @@ def start_listen(callback):
     with microphone as source:
         recognizer.adjust_for_ambient_noise(source, duration=1)
         # audio = recognizer.listen(source)
-        audio1 = recognizer.record(source, duration=4)
-        word = recognizer.recognize_google(audio1)
+        audio = recognizer.record(source, duration=4)
+        word = recognizer.recognize_google(audio)
         callback(word)
